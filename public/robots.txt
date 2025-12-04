@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /cart
+Disallow: /login
+
+Sitemap: https://999premiumtools.uz/sitemap.xml
