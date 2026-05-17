@@ -1,22 +1,25 @@
 import React from 'react';
 import SEO from './SEO';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const About = () => {
+    const { t } = useLanguage();
+
     return (
         <div className="bg-gray-50 min-h-screen py-12">
             <SEO
-                title="Biz Haqimizda"
-                description="999 Premium Tools - 2015 yildan beri zargarlik sohasida yetakchi do'kon. Bizning tariximiz va ustunliklarimiz haqida bilib oling."
+                title={t.about.title}
+                description={t.about.subtitle}
             />
             <div className="container mx-auto px-4">
                 <div className="max-w-4xl mx-auto">
                     {/* Header */}
                     <div className="text-center mb-12">
                         <h1 className="text-4xl font-bold text-gray-800 mb-4">
-                            999 Premium Tools Haqida
+                            {t.about.title}
                         </h1>
                         <p className="text-xl text-gray-600">
-                            Professional zargarlik uskunalari bo'yicha yetakchi do'kon
+                            {t.about.subtitle}
                         </p>
                     </div>
 
@@ -25,23 +28,17 @@ const About = () => {
                         {/* Company Story */}
                         <section>
                             <h2 className="text-2xl font-bold text-primary mb-4">
-                                Bizning Tariximiz
+                                {t.about.story.title}
                             </h2>
                             <p className="text-gray-700 leading-relaxed mb-4">
-                                999 Premium Tools 2015-yilda O'zbekistonda tashkil etilgan va zargarlik sohasida professional
-                                asbob-uskunalar bilan ta'minlash bo'yicha ixtisoslashgan. Biz o'z mijozlarimizga yuqori sifatli,
-                                ishonchli va zamonaviy uskunalarni taqdim etamiz.
-                            </p>
-                            <p className="text-gray-700 leading-relaxed">
-                                Yillar davomida biz minglab zargarlar, hunarmandlar va korxonalar bilan hamkorlik qildik.
-                                Har bir mijozimiz bizning ustuvor yo'nalishimiz hisoblanadi.
+                                {t.about.story.text}
                             </p>
                         </section>
 
                         {/* Our Advantages */}
                         <section>
                             <h2 className="text-2xl font-bold text-primary mb-4">
-                                Bizning Ustunliklarimiz
+                                {t.about.why.title}
                             </h2>
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div className="flex gap-3">
@@ -52,10 +49,10 @@ const About = () => {
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-gray-800 mb-1">
-                                            100% Original Mahsulotlar
+                                            {t.about.why.quality}
                                         </h3>
                                         <p className="text-gray-600 text-sm">
-                                            Barcha mahsulotlarimiz rasmiy ta'minotchilardan keladi va kafolat bilan ta'minlanadi.
+                                            {t.about.why.qualityText}
                                         </p>
                                     </div>
                                 </div>
@@ -68,10 +65,10 @@ const About = () => {
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-gray-800 mb-1">
-                                            Professional Maslahat
+                                            {t.about.why.experience}
                                         </h3>
                                         <p className="text-gray-600 text-sm">
-                                            Tajribali mutaxassislarimiz sizga to'g'ri tanlashda yordam beradi.
+                                            {t.about.why.experienceText}
                                         </p>
                                     </div>
                                 </div>
@@ -84,10 +81,10 @@ const About = () => {
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-gray-800 mb-1">
-                                            Tez Yetkazish
+                                            {t.about.why.delivery}
                                         </h3>
                                         <p className="text-gray-600 text-sm">
-                                            O'zbekiston bo'ylab tez va xavfsiz yetkazib berish xizmati.
+                                            {t.about.why.deliveryText}
                                         </p>
                                     </div>
                                 </div>
@@ -100,58 +97,54 @@ const About = () => {
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-gray-800 mb-1">
-                                            Hamyonbop Narxlar
+                                            {t.about.why.support}
                                         </h3>
                                         <p className="text-gray-600 text-sm">
-                                            Sifat va narxning eng yaxshi kombinatsiyasi.
+                                            {t.about.why.supportText}
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         </section>
 
-                        {/* Why Choose Us */}
+                        {/* Values */}
                         <section>
                             <h2 className="text-2xl font-bold text-primary mb-4">
-                                Nima Uchun Bizni Tanlashadi?
+                                {t.about.values.title}
                             </h2>
                             <ul className="space-y-3 text-gray-700">
                                 <li className="flex items-start gap-2">
                                     <span className="text-primary mt-1">▶</span>
-                                    <span>8+ yillik tajriba zargarlik asboblari bozorida</span>
+                                    <span>{t.about.values.quality}: {t.about.values.qualityText}</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <span className="text-primary mt-1">▶</span>
-                                    <span>5000+ mamnun mijozlar</span>
+                                    <span>{t.about.values.service}: {t.about.values.serviceText}</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <span className="text-primary mt-1">▶</span>
-                                    <span>Xalqaro brendlar bilan hamkorlik</span>
+                                    <span>{t.about.values.innovation}: {t.about.values.innovationText}</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <span className="text-primary mt-1">▶</span>
-                                    <span>Sotuvdan keyingi xizmat va texnik qo'llab-quvvatlash</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="text-primary mt-1">▶</span>
-                                    <span>Doimiy yangi mahsulotlar va texnologiyalar</span>
+                                    <span>{t.about.values.trust}: {t.about.values.trustText}</span>
                                 </li>
                             </ul>
                         </section>
 
-                        {/* Quality Commitment */}
+                        {/* Mission */}
                         <section className="bg-red-50 rounded-lg p-6">
                             <h2 className="text-2xl font-bold text-primary mb-4">
-                                Sifat - Bizning Ustuvor Yo'nalishimiz
+                                {t.about.mission.title}
                             </h2>
                             <p className="text-gray-700 leading-relaxed">
-                                Har bir mahsulot qat'iy sifat nazoratidan o'tadi. Biz faqat ishonchli brendlar va
-                                ishlab chiqaruvchilar bilan hamkorlik qilamiz. Sizning muvaffaqiyatingiz - bizning maqsadimiz!
+                                {t.about.mission.text}
                             </p>
                         </section>
                     </div>
                 </div>
             </div>
+
         </div>
     );
 };

@@ -1,20 +1,26 @@
+# Dependencies
 node_modules
+
+# Build
 dist
+
+# Environment
 .env
+.env.local
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Logs
 *.log
+npm-debug.log*
+
+# IDE
 .vscode
 .idea
-__pycache__
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.so
-*.egg
-*.egg-info
-venv
-env
-ENV
-backend/.env
-backend/__pycache__
+*.swp
+*.swo
+
+# Misc
+.cache

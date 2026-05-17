@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const Login = ({ onLogin, onNavigate }) => {
+    const { t } = useLanguage();
     const [isRegister, setIsRegister] = useState(false);
     const [formData, setFormData] = useState({
         firstName: '',
@@ -22,18 +24,18 @@ const Login = ({ onLogin, onNavigate }) => {
         e.preventDefault();
 
         if (!formData.email || !formData.password) {
-            setError('Iltimos, barcha maydonlarni to\'ldiring');
+            setError(t.login.error);
             return;
         }
 
         if (isRegister && (!formData.firstName || !formData.lastName)) {
-            setError('Iltimos, barcha maydonlarni to\'ldiring');
+            setError(t.login.error);
             return;
         }
 
         const success = onLogin(formData, isRegister);
         if (!success) {
-            setError(isRegister ? 'Bu email allaqachon ro\'yxatdan o\'tgan' : 'Email yoki parol noto\'g\'ri');
+            setError(isRegister ? t.login.emailExists : t.login.invalidCreds);
         }
     };
 
@@ -43,7 +45,7 @@ const Login = ({ onLogin, onNavigate }) => {
                 <div className="max-w-md mx-auto">
                     <div className="bg-white rounded-xl shadow-lg p-8">
                         <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-                            {isRegister ? 'Ro\'yxatdan o\'tish' : 'Kirish'}
+                            {isRegister ? t.login.signUp : t.login.signIn}
                         </h2>
 
                         {error && (
@@ -57,7 +59,7 @@ const Login = ({ onLogin, onNavigate }) => {
                                 <>
                                     <div>
                                         <label className="block text-gray-700 font-medium mb-2">
-                                            Ism
+                                            {t.login.firstName}
                                         </label>
                                         <input
                                             type="text"
@@ -65,13 +67,13 @@ const Login = ({ onLogin, onNavigate }) => {
                                             value={formData.firstName}
                                             onChange={handleChange}
                                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                                            placeholder="Ismingiz"
+                                            placeholder={t.login.firstName}
                                         />
                                     </div>
 
                                     <div>
                                         <label className="block text-gray-700 font-medium mb-2">
-                                            Familiya
+                                            {t.login.lastName}
                                         </label>
                                         <input
                                             type="text"
@@ -79,7 +81,7 @@ const Login = ({ onLogin, onNavigate }) => {
                                             value={formData.lastName}
                                             onChange={handleChange}
                                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                                            placeholder="Familiyangiz"
+                                            placeholder={t.login.lastName}
                                         />
                                     </div>
                                 </>
@@ -87,7 +89,7 @@ const Login = ({ onLogin, onNavigate }) => {
 
                             <div>
                                 <label className="block text-gray-700 font-medium mb-2">
-                                    Email
+                                    {t.login.email}
                                 </label>
                                 <input
                                     type="email"
@@ -101,7 +103,7 @@ const Login = ({ onLogin, onNavigate }) => {
 
                             <div>
                                 <label className="block text-gray-700 font-medium mb-2">
-                                    Parol
+                                    {t.login.password}
                                 </label>
                                 <input
                                     type="password"
@@ -117,7 +119,7 @@ const Login = ({ onLogin, onNavigate }) => {
                                 type="submit"
                                 className="w-full bg-primary text-white py-3 rounded-lg hover:bg-red-700 transition font-semibold text-lg"
                             >
-                                {isRegister ? 'Ro\'yxatdan o\'tish' : 'Kirish'}
+                                {isRegister ? t.login.register : t.login.submit}
                             </button>
                         </form>
 
@@ -131,8 +133,8 @@ const Login = ({ onLogin, onNavigate }) => {
                                 className="text-primary hover:underline"
                             >
                                 {isRegister
-                                    ? 'Akkauntingiz bormi? Kirish'
-                                    : 'Akkauntingiz yo\'qmi? Ro\'yxatdan o\'tish'}
+                                    ? t.login.haveAccount
+                                    : t.login.noAccount}
                             </button>
                         </div>
                     </div>

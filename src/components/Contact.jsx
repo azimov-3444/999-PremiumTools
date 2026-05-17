@@ -1,22 +1,25 @@
 import React from 'react';
 import SEO from './SEO';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const Contact = () => {
+    const { t } = useLanguage();
+
     return (
         <div className="bg-gray-50 min-h-screen py-8 md:py-12">
             <SEO
-                title="Bog'lanish"
-                description="Biz bilan bog'laning: Manzil, telefon raqamlar va ish vaqti. Toshkent sh., Chilonzor tumani."
+                title={t.contact.title}
+                description={t.contact.subtitle}
             />
             <div className="container mx-auto px-4">
                 <div className="max-w-6xl mx-auto">
                     {/* Header */}
                     <div className="text-center mb-8 md:mb-12">
                         <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3 md:mb-4">
-                            Biz Bilan Bog'lanish
+                            {t.contact.title}
                         </h1>
                         <p className="text-base md:text-xl text-gray-600">
-                            Savollaringiz bormi? Biz sizga yordam berishga tayyormiz!
+                            {t.contact.subtitle}
                         </p>
                     </div>
 
@@ -24,7 +27,7 @@ const Contact = () => {
                         {/* Contact Information */}
                         <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
                             <h2 className="text-xl md:text-2xl font-bold text-primary mb-6">
-                                Bog'lanish Ma'lumotlari
+                                {t.contact.getInTouch}
                             </h2>
 
                             <div className="space-y-6">
@@ -39,10 +42,9 @@ const Contact = () => {
                                         </div>
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-gray-800 mb-1">Manzil</h3>
+                                        <h3 className="font-semibold text-gray-800 mb-1">{t.contact.address}</h3>
                                         <p className="text-sm md:text-base text-gray-600">
-                                            Toshkent sh., Chilonzor tumani,<br />
-                                            Katta Bozor ko'chasi, 123-uy
+                                            {t.contact.addressFull}
                                         </p>
                                     </div>
                                 </div>
@@ -57,7 +59,7 @@ const Contact = () => {
                                         </div>
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-gray-800 mb-1">Telefon</h3>
+                                        <h3 className="font-semibold text-gray-800 mb-1">{t.contact.phone}</h3>
                                         <p className="text-sm md:text-base text-gray-600">
                                             +998 (90) 123-45-67<br />
                                             +998 (91) 234-56-78
@@ -75,7 +77,7 @@ const Contact = () => {
                                         </div>
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-gray-800 mb-1">Email</h3>
+                                        <h3 className="font-semibold text-gray-800 mb-1">{t.contact.email}</h3>
                                         <p className="text-sm md:text-base text-gray-600">
                                             info@999premiumtools.uz<br />
                                             support@999premiumtools.uz
@@ -93,10 +95,10 @@ const Contact = () => {
                                         </div>
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-gray-800 mb-1">Ish Vaqti</h3>
+                                        <h3 className="font-semibold text-gray-800 mb-1">{t.contact.workTime}</h3>
                                         <p className="text-sm md:text-base text-gray-600">
-                                            Dushanba - Shanba: 9:00 - 19:00<br />
-                                            Yakshanba: Dam olish
+                                            {t.contact.weekdays}: {t.contact.weekdaysTime}<br />
+                                            {t.contact.saturday}: {t.contact.saturdayTime}
                                         </p>
                                     </div>
                                 </div>
@@ -104,7 +106,7 @@ const Contact = () => {
 
                             {/* Social Media */}
                             <div className="mt-8 pt-6 border-t">
-                                <h3 className="font-semibold text-gray-800 mb-4">Ijtimoiy Tarmoqlar</h3>
+                                <h3 className="font-semibold text-gray-800 mb-4">{t.delivery.social}</h3>
                                 <div className="flex gap-3">
                                     <a href="#" className="w-12 h-12 md:w-10 md:h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white hover:bg-blue-700 transition">
                                         <span className="font-bold">f</span>
@@ -125,7 +127,7 @@ const Contact = () => {
                         {/* Map */}
                         <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
                             <h2 className="text-xl md:text-2xl font-bold text-primary mb-6">
-                                Bizning Do'kon Joylashuvi
+                                {t.delivery.location.title}
                             </h2>
 
                             {/* Google Maps */}
@@ -143,13 +145,13 @@ const Contact = () => {
 
                             <div className="bg-red-50 rounded-lg p-4">
                                 <h3 className="font-semibold text-gray-800 mb-2">
-                                    🚗 Qanday Yetib Borish Mumkin?
+                                    {t.delivery.location.howToGet}
                                 </h3>
                                 <ul className="text-sm text-gray-600 space-y-1">
-                                    <li>• Metro: Chilonzor bekati (5 daqiqa piyoda)</li>
-                                    <li>• Avtobus: 23, 45, 78-raqamli marshrutlar</li>
-                                    <li>• Taksi: "Chilonzor", Katta Bozor yonida</li>
-                                    <li>• Mashinada: Bepul to'xtash joyi mavjud</li>
+                                    <li>• {t.delivery.location.metro}</li>
+                                    <li>• {t.delivery.location.bus}</li>
+                                    <li>• {t.delivery.location.taxi}</li>
+                                    <li>• {t.delivery.location.car}</li>
                                 </ul>
                             </div>
                         </div>
@@ -158,46 +160,46 @@ const Contact = () => {
                     {/* Delivery & Payment Info */}
                     <div className="mt-6 md:mt-8 bg-white rounded-xl shadow-lg p-6 md:p-8">
                         <h2 className="text-xl md:text-2xl font-bold text-primary mb-6">
-                            Yetkazish va To'lov Haqida
+                            {t.delivery.title}
                         </h2>
 
                         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
                             <div>
                                 <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
                                     <span className="text-primary text-xl">🚚</span>
-                                    Yetkazish
+                                    {t.delivery.shipping.title}
                                 </h3>
                                 <ul className="text-sm text-gray-600 space-y-2">
-                                    <li>• Toshkent bo'ylab - 1-2 kun</li>
-                                    <li>• Boshqa viloyatlar - 3-5 kun</li>
-                                    <li>• 500,000 so'mdan yuqori - Bepul</li>
-                                    <li>• Kuryer orqali eshikkacha</li>
+                                    <li>• {t.delivery.shipping.tashkent}</li>
+                                    <li>• {t.delivery.shipping.regions}</li>
+                                    <li>• {t.delivery.shipping.free}</li>
+                                    <li>• {t.delivery.shipping.courier}</li>
                                 </ul>
                             </div>
 
                             <div>
                                 <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
                                     <span className="text-primary text-xl">💳</span>
-                                    To'lov Usullari
+                                    {t.delivery.payment.title}
                                 </h3>
                                 <ul className="text-sm text-gray-600 space-y-2">
-                                    <li>• Naqd pul</li>
-                                    <li>• Bank kartasi</li>
-                                    <li>• Payme / Click</li>
-                                    <li>• Bank o'tkazmasi</li>
+                                    <li>• {t.delivery.payment.cash}</li>
+                                    <li>• {t.delivery.payment.card}</li>
+                                    <li>• {t.delivery.payment.apps}</li>
+                                    <li>• {t.delivery.payment.transfer}</li>
                                 </ul>
                             </div>
 
                             <div>
                                 <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
                                     <span className="text-primary text-xl">🛡️</span>
-                                    Kafolat
+                                    {t.delivery.warranty.title}
                                 </h3>
                                 <ul className="text-sm text-gray-600 space-y-2">
-                                    <li>• Rasmiy kafolat 1-2 yil</li>
-                                    <li>• 14 kun ichida qaytarish</li>
-                                    <li>• Bepul texnik xizmat</li>
-                                    <li>• Almashtirish imkoniyati</li>
+                                    <li>• {t.delivery.warranty.official}</li>
+                                    <li>• {t.delivery.warranty.return}</li>
+                                    <li>• {t.delivery.warranty.service}</li>
+                                    <li>• {t.delivery.warranty.exchange}</li>
                                 </ul>
                             </div>
                         </div>

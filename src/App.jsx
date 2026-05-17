@@ -1,113 +1,108 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { useLocalStorage } from './hooks/useLocalStorage';
+import * as api from './api/supabaseApi';
 import { hashPassword, verifyPassword } from './utils/passwordUtils';
-import { initialCategories, initialProducts } from './data/initialData';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Home from './components/Home';
 import Catalog from './components/Catalog';
-import Cart from './components/Cart';
 import Favourites from './components/Favourites';
 import Login from './components/Login';
 import AdminPanel from './components/AdminPanel';
 import About from './components/About';
 import Contact from './components/Contact';
+import { useLanguage } from './i18n/LanguageContext';
+import { toast } from 'react-toastify';
 
 function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentUser, setCurrentUser] = useLocalStorage('currentUser', null);
-  const [users, setUsers] = useLocalStorage('users', []);
-  const [categories, setCategories] = useLocalStorage('categories', initialCategories);
-  const [products, setProducts] = useLocalStorage('products', initialProducts);
-  const [cart, setCart] = useLocalStorage('cart', []);
-  const [favourites, setFavourites] = useLocalStorage('favourites', []);
-  const [visitStats, setVisitStats] = useLocalStorage('visitStats', {
+
+  // State
+  const [currentUser, setCurrentUser] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [carouselItems, setCarouselItems] = useState([]);
+  const [favourites, setFavourites] = useState([]);
+  const [visitStats, setVisitStats] = useState({
     totalVisits: 0,
     uniqueVisitors: [],
     pageViews: []
   });
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [carouselItems, setCarouselItems] = useLocalStorage('carouselItems', [
-    {
-      id: 1,
-      title: 'Professional zargarlik asboblari',
-      description: 'Yuqori sifatli va ishonchli vositalar',
-      image: 'https://images.unsplash.com/photo-1589128777073-263566fd5ea2?auto=format&fit=crop&q=80&w=2000',
-      buttonText: 'Katalogga o\'tish',
-      link: '/catalog'
-    },
-    {
-      id: 2,
-      title: 'Mustahkam va sifatli uskunalar',
-      description: 'Uzoq yillar xizmat qiladi',
-      image: 'https://images.unsplash.com/photo-1621905251189-fc015acafd31?auto=format&fit=crop&q=80&w=2000',
-      buttonText: 'Batafsil',
-      link: '/about'
-    },
-    {
-      id: 3,
-      title: '999 Premium Tools — Sizning ishonchli do\'koningiz',
-      description: 'Har qanday zargarlik ishlariga mos',
-      image: 'https://images.unsplash.com/photo-1531995811006-35cb42e1a022?auto=format&fit=crop&q=80&w=2000',
-      buttonText: 'Bog\'lanish',
-      link: '/contact'
-    }
-  ]);
-
-  // Track visits
+  // Load data from Supabase on mount
   useEffect(() => {
-    const sessionId = sessionStorage.getItem('sessionId') || Date.now().toString();
-    if (!sessionStorage.getItem('sessionId')) {
-      sessionStorage.setItem('sessionId', sessionId);
+    loadAllData();
+
+    // Load user from localStorage (session)
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      setCurrentUser(JSON.parse(savedUser));
     }
 
-    const currentPath = location.pathname;
-    const timestamp = new Date().toISOString();
+    // Load favourites from localStorage
+    const savedFavourites = localStorage.getItem('favourites');
+    if (savedFavourites) setFavourites(JSON.parse(savedFavourites));
+  }, []);
 
-    // Check if this is a unique visitor
-    const isUniqueVisitor = !visitStats.uniqueVisitors.some(v => v.sessionId === sessionId);
+  useEffect(() => {
+    localStorage.setItem('favourites', JSON.stringify(favourites));
+  }, [favourites]);
 
-    setVisitStats(prev => ({
-      totalVisits: prev.totalVisits + 1,
-      uniqueVisitors: isUniqueVisitor
-        ? [...prev.uniqueVisitors, { sessionId, firstVisit: timestamp }]
-        : prev.uniqueVisitors,
-      pageViews: [...prev.pageViews, { path: currentPath, timestamp, sessionId }]
-    }));
-  }, [location.pathname]);
+  // Load all data from Supabase
+  const loadAllData = async () => {
+    try {
+      setLoading(true);
+      const [categoriesData, productsData, carouselData, usersData, statsData, reviewsData] = await Promise.all([
+        api.getAllCategories(),
+        api.getAllProducts(),
+        api.getAllCarouselItems(),
+        api.getAllUsers(),
+        api.getVisitStats(),
+        api.getAllReviews()
+      ]);
+
+      setCategories(categoriesData);
+      setProducts(productsData);
+      setCarouselItems(carouselData);
+      setUsers(usersData);
+      setVisitStats(statsData);
+      setReviews(reviewsData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Handle login/register
-  const handleLogin = (formData, isRegister) => {
-    if (isRegister) {
-      // Check if user already exists
-      if (users.find(u => u.email === formData.email)) {
-        return false;
-      }
+  const handleLogin = async (formData, isRegister) => {
+    try {
+      if (isRegister) {
+        const newUser = await api.registerUser({
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          password: hashPassword(formData.password)
+        });
 
-      // Create new user
-      const newUser = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: hashPassword(formData.password),
-        role: formData.email === 'admin@999.uz' ? 'admin' : 'user',
-        registeredAt: new Date().toISOString(),
-      };
-
-      setUsers([...users, newUser]);
-      setCurrentUser(newUser);
-      navigate('/');
-      return true;
-    } else {
-      // Login - verify hashed password
-      const user = users.find(u => u.email === formData.email);
-
-      if (user && verifyPassword(formData.password, user.password)) {
+        setCurrentUser(newUser);
+        localStorage.setItem('currentUser', JSON.stringify(newUser));
+        await loadAllData(); // Reload users
+        navigate('/');
+        return true;
+      } else {
+        const user = await api.loginUser(formData.email, hashPassword(formData.password));
         setCurrentUser(user);
+        localStorage.setItem('currentUser', JSON.stringify(user));
         navigate('/');
         return true;
       }
+    } catch (error) {
+      console.error('Login/Register error:', error);
       return false;
     }
   };
@@ -115,6 +110,7 @@ function AppContent() {
   // Handle logout
   const handleLogout = () => {
     setCurrentUser(null);
+    localStorage.removeItem('currentUser');
     navigate('/');
   };
 
@@ -122,40 +118,6 @@ function AppContent() {
   const handleNavigate = (page) => {
     navigate('/' + page);
   };
-
-  // Add to cart
-  const handleAddToCart = (product) => {
-    const existingItem = cart.find(item => item.productId === product.id);
-
-    if (existingItem) {
-      setCart(cart.map(item =>
-        item.productId === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
-    } else {
-      setCart([...cart, { productId: product.id, quantity: 1 }]);
-    }
-  };
-
-  // Update cart quantity
-  const handleUpdateQuantity = (productId, quantity) => {
-    if (quantity <= 0) {
-      setCart(cart.filter(item => item.productId !== productId));
-    } else {
-      setCart(cart.map(item =>
-        item.productId === productId
-          ? { ...item, quantity }
-          : item
-      ));
-    }
-  };
-
-  // Remove from cart
-  const handleRemoveFromCart = (productId) => {
-    setCart(cart.filter(item => item.productId !== productId));
-  };
-
   // Toggle favourite
   const handleToggleFavourite = (productId) => {
     if (favourites.includes(productId)) {
@@ -165,81 +127,200 @@ function AppContent() {
     }
   };
 
-  // Admin: Add category
-  const handleAddCategory = (name) => {
-    const newCategory = {
-      id: categories.length > 0 ? Math.max(...categories.map(c => c.id)) + 1 : 1,
-      name: name,
-    };
+  const handleAddCategory = async (name) => {
+    const newCategory = await api.addCategory(name);
     setCategories([...categories, newCategory]);
   };
 
-  // Admin: Delete category
-  const handleDeleteCategory = (categoryId) => {
+  const handleDeleteCategory = async (categoryId) => {
+    await api.deleteCategory(categoryId);
     setCategories(categories.filter(c => c.id !== categoryId));
   };
 
-  // Admin: Add product
-  const handleAddProduct = (productData) => {
-    const newProduct = {
-      id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
-      ...productData,
-    };
+  const handleAddProduct = async (productData) => {
+    const newProduct = await api.addProduct(productData);
     setProducts([...products, newProduct]);
   };
 
   // Admin: Delete product
-  const handleDeleteProduct = (productId) => {
-    setProducts(products.filter(p => p.id !== productId));
+  const handleDeleteProduct = async (productId) => {
+    try {
+      await api.deleteProduct(productId);
+      setProducts(products.filter(p => p.id !== productId));
+    } catch (error) {
+      console.error('Error deleting product:', error);
+    }
   };
 
   // Admin: Update product stock
-  const handleUpdateProductStock = (productId, newStock) => {
-    setProducts(products.map(product =>
-      product.id === productId
-        ? { ...product, stock: newStock, inStock: newStock > 0 }
-        : product
-    ));
+  const handleUpdateProductStock = async (productId, newStock) => {
+    try {
+      const updatedProduct = await api.updateProductStock(productId, newStock);
+      setProducts(products.map(product =>
+        product.id === productId ? updatedProduct : product
+      ));
+    } catch (error) {
+      console.error('Error updating stock:', error);
+    }
   };
 
   // Admin: Update user role
-  const handleUpdateUserRole = (email, role) => {
-    setUsers(users.map(user =>
-      user.email === email ? { ...user, role } : user
-    ));
+  const handleUpdateUserRole = async (email, role) => {
+    try {
+      await api.updateUserRole(email, role);
+      setUsers(users.map(user =>
+        user.email === email ? { ...user, role } : user
+      ));
 
-    // Update current user if it's them
-    if (currentUser && currentUser.email === email) {
-      setCurrentUser({ ...currentUser, role });
+      // Update current user if it's them
+      if (currentUser && currentUser.email === email) {
+        const updatedUser = { ...currentUser, role };
+        setCurrentUser(updatedUser);
+        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error('Error updating user role:', error);
     }
   };
 
   // Admin: Update product category
-  const handleUpdateProductCategory = (productId, newCategoryId) => {
-    setProducts(products.map(product =>
-      product.id === productId
-        ? { ...product, categoryId: newCategoryId }
-        : product
-    ));
+  const handleUpdateProductCategory = async (productId, newCategoryId) => {
+    try {
+      const updatedProduct = await api.updateProductCategory(productId, newCategoryId);
+      setProducts(products.map(product =>
+        product.id === productId ? updatedProduct : product
+      ));
+    } catch (error) {
+      console.error('Error updating product category:', error);
+    }
   };
 
   // Admin: Add carousel item
-  const handleAddCarouselItem = (item) => {
-    const newItem = {
-      id: Date.now(),
-      ...item
-    };
-    setCarouselItems([...carouselItems, newItem]);
+  const handleAddCarouselItem = async (item) => {
+    try {
+      const newItem = await api.addCarouselItem(item);
+      setCarouselItems([...carouselItems, newItem]);
+    } catch (error) {
+      console.error('Error adding carousel item:', error);
+      throw error; // Rethrow to let UI handle it
+    }
   };
 
   // Admin: Delete carousel item
-  const handleDeleteCarouselItem = (id) => {
-    setCarouselItems(carouselItems.filter(item => item.id !== id));
+  const handleDeleteCarouselItem = async (id) => {
+    try {
+      await api.deleteCarouselItem(id);
+      setCarouselItems(carouselItems.filter(item => item.id !== id));
+    } catch (error) {
+      console.error('Error deleting carousel item:', error);
+    }
   };
+
+  // Admin: Update carousel item
+  const handleUpdateCarouselItem = async (itemId, itemData) => {
+    try {
+      const updatedItem = await api.updateCarouselItem(itemId, itemData);
+      setCarouselItems(carouselItems.map(item =>
+        item.id === itemId ? updatedItem : item
+      ));
+    } catch (error) {
+      console.error('Error updating carousel item:', error);
+      throw error;
+    }
+  };
+
+  // Admin: Update product best seller status
+  const handleUpdateProductBestSeller = async (productId, isBestSeller) => {
+    try {
+      const updatedProduct = await api.updateProductBestSeller(productId, isBestSeller);
+      setProducts(products.map(product =>
+        product.id === productId ? updatedProduct : product
+      ));
+    } catch (error) {
+      console.error('Error updating best seller:', error);
+    }
+  };
+
+  const handleUpdateProduct = async (productId, productData) => {
+    try {
+      const updatedProduct = await api.updateProduct(productId, productData);
+      if (updatedProduct) {
+        console.log('App.jsx: Updated product:', updatedProduct);
+        const numericId = Number(productId);
+        setProducts(prevProducts => prevProducts.map(p =>
+          Number(p.id) === numericId ? updatedProduct : p
+        ));
+        // Bazadan yangi ma'lumotlarni qaytadan yuklash
+        await loadAllData();
+      }
+    } catch (error) {
+      console.error('App.jsx update error:', error);
+      throw error;
+    }
+  };
+
+  // Admin: Update product discount
+  const handleUpdateProductDiscount = async (productId, discount) => {
+    try {
+      const updatedProduct = await api.updateProductDiscount(productId, discount);
+      setProducts(products.map(product =>
+        product.id === productId ? updatedProduct : product
+      ));
+    } catch (error) {
+      console.error('Error updating discount:', error);
+    }
+  };
+
+  // Admin: Update category
+  const handleUpdateCategory = async (categoryId, categoryData) => {
+    try {
+      const updatedCategory = await api.updateCategory(categoryId, categoryData);
+      setCategories(categories.map(c => c.id === categoryId ? updatedCategory : c));
+    } catch (error) {
+      console.error('Error updating category:', error);
+      throw error;
+    }
+  };
+
+  // Admin: Delete review
+  const handleDeleteReview = async (reviewId) => {
+    try {
+      await api.deleteReview(reviewId);
+      setReviews(reviews.filter(r => r.id !== reviewId));
+    } catch (error) {
+      console.error('Error deleting review:', error);
+    }
+  };
+
+  // Admin: Update password
+  const handleUpdatePassword = async (email, newPassword) => {
+    try {
+      const hashedPassword = hashPassword(newPassword);
+      const updatedUser = await api.updateUserPassword(email, hashedPassword);
+
+      // Update local state if it's the current user
+      if (currentUser && currentUser.email === email) {
+        setCurrentUser(updatedUser);
+        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      }
+
+      // Update users list
+      setUsers(users.map(u => u.email === email ? updatedUser : u));
+      return true;
+    } catch (error) {
+      console.error('Error updating password:', error);
+      toast.error(`Parolni o'zgartirishda xatolik: ${error.message}`);
+      return false;
+    }
+  };
+
+
 
   // Protected admin route
   const ProtectedAdminRoute = ({ children }) => {
-    if (!currentUser || currentUser.role !== 'admin') {
+    const allowedRoles = ['moderator', 'admin', 'super_admin'];
+
+    if (!currentUser || !allowedRoles.includes(currentUser.role)) {
       return (
         <div className="bg-gray-50 min-h-screen py-12">
           <div className="container mx-auto px-4">
@@ -260,8 +341,38 @@ function AppContent() {
         </div>
       );
     }
+
     return children;
   };
+
+  // Enrich products with review data
+  const productsWithReviews = useMemo(() => {
+    return products.map(product => {
+      const productReviews = reviews.filter(r => r.product_id === product.id);
+      const reviewCount = productReviews.length;
+      const averageRating = reviewCount > 0
+        ? productReviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
+        : 0;
+
+      return {
+        ...product,
+        reviewCount,
+        rating: averageRating
+      };
+    });
+  }, [products, reviews]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Yuklanmoqda...</p>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -269,7 +380,6 @@ function AppContent() {
         currentUser={currentUser}
         onLogout={handleLogout}
         onNavigate={handleNavigate}
-        cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
         favouritesCount={favourites.length}
       />
 
@@ -278,9 +388,8 @@ function AppContent() {
           path="/"
           element={
             <Home
-              products={products}
+              products={productsWithReviews}
               categories={categories}
-              onAddToCart={handleAddToCart}
               onToggleFavourite={handleToggleFavourite}
               favourites={favourites}
               onNavigate={handleNavigate}
@@ -293,23 +402,10 @@ function AppContent() {
           path="/catalog"
           element={
             <Catalog
-              products={products}
+              products={productsWithReviews}
               categories={categories}
-              onAddToCart={handleAddToCart}
               onToggleFavourite={handleToggleFavourite}
               favourites={favourites}
-            />
-          }
-        />
-
-        <Route
-          path="/cart"
-          element={
-            <Cart
-              cart={cart}
-              products={products}
-              onUpdateQuantity={handleUpdateQuantity}
-              onRemoveFromCart={handleRemoveFromCart}
             />
           }
         />
@@ -319,8 +415,7 @@ function AppContent() {
           element={
             <Favourites
               favourites={favourites}
-              products={products}
-              onAddToCart={handleAddToCart}
+              products={productsWithReviews}
               onToggleFavourite={handleToggleFavourite}
             />
           }
@@ -346,15 +441,23 @@ function AppContent() {
                 users={users}
                 onAddCategory={handleAddCategory}
                 onDeleteCategory={handleDeleteCategory}
+                onUpdateCategory={handleUpdateCategory}
                 onAddProduct={handleAddProduct}
                 onUpdateUserRole={handleUpdateUserRole}
                 onDeleteProduct={handleDeleteProduct}
                 onUpdateProductStock={handleUpdateProductStock}
                 onUpdateProductCategory={handleUpdateProductCategory}
+                onUpdateProductBestSeller={handleUpdateProductBestSeller}
+                onUpdateProduct={handleUpdateProduct}
                 carouselItems={carouselItems}
                 onAddCarouselItem={handleAddCarouselItem}
                 onDeleteCarouselItem={handleDeleteCarouselItem}
+                onUpdateCarouselItem={handleUpdateCarouselItem}
+                reviews={reviews}
+                onDeleteReview={handleDeleteReview}
                 visitStats={visitStats}
+                currentUser={currentUser}
+                onUpdatePassword={handleUpdatePassword}
               />
             </ProtectedAdminRoute>
           }
@@ -370,6 +473,8 @@ function AppContent() {
           element={<Contact />}
         />
       </Routes>
+
+      <Footer categories={categories} />
     </div>
   );
 }
